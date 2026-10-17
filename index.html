@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#101113" />
+    <title>PELICULEO</title>
+    <link rel="icon" type="image/png" sizes="48x48" href="./icons/favicon-48-v4.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./icons/favicon-32-v4.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="./icons/favicon-16-v4.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/apple-touch-icon-v2.png" />
+    <link rel="manifest" href="./manifest.webmanifest?v=2" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <button class="brand brand-button" id="openMenuBrand" type="button" aria-label="Abrir menu">PELICULEO</button>
+      <nav class="nav-actions" aria-label="Acciones principales">
+        <button class="primary-button" id="openAddButton" type="button">Anadir pelicula</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="heroTitle">
+        <div class="hero-copy">
+          <p class="eyebrow">PELICULEO</p>
+          <h1 id="heroTitle">Tu cine personal, ordenado a tu manera.</h1>
+          <p class="hero-text">
+            Guarda lo que quieres ver, lo que ya viste y esas joyas que quieres tener siempre localizadas.
+          </p>
+          <div class="hero-actions">
+            <button class="primary-button" id="heroAddButton" type="button">Catalogar ahora</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="search-strip" aria-label="Busqueda del catalogo">
+        <label class="search-field">
+          <span>Buscar</span>
+          <input id="searchInput" type="search" placeholder="Titulo, genero o sinopsis" autocomplete="off" />
+        </label>
+        <label class="search-genre-field">
+          <span>Genero</span>
+          <select id="searchGenreFilter">
+            <option value="all">Todos</option>
+          </select>
+        </label>
+        <label class="search-status-field">
+          <span>Estado</span>
+          <select id="searchStatusFilter">
+            <option value="all">Todas</option>
+            <option value="watchlist">Por ver</option>
+            <option value="watched">Vistas</option>
+          </select>
+        </label>
+      </section>
+
+      <section class="catalog-section" id="catalogo" aria-labelledby="catalogTitle">
+        <div class="section-heading">
+          <p class="eyebrow">Catalogo</p>
+          <h2 id="catalogTitle">Tu cartelera personal</h2>
+        </div>
+        <div class="movie-grid" id="movieGrid"></div>
+        <div class="empty-state" id="emptyState" hidden>
+          <h3>Aun no hay peliculas aqui</h3>
+          <p>Empieza anadiendo una pelicula por titulo y trae su sinopsis desde internet.</p>
+          <button class="primary-button" id="emptyAddButton" type="button">Anadir la primera</button>
+        </div>
+      </section>
+    </main>
+
+    <dialog class="modal" id="movieModal">
+      <form class="modal-body" id="movieForm" method="dialog">
+        <div class="modal-heading">
+          <div>
+            <p class="eyebrow">Ficha</p>
+            <h2 id="modalTitle">Anadir pelicula</h2>
+          </div>
+          <button class="icon-button" id="closeMovieModal" value="cancel" type="button" aria-label="Cerrar">x</button>
+        </div>
+
+        <input id="movieId" type="hidden" />
+
+        <div class="lookup-row">
+          <label>
+            <span>Titulo o codigo IMDb</span>
+            <input id="titleInput" type="text" placeholder="Ej. El viaje de Chihiro o tt0816692" required />
+          </label>
+          <button class="secondary-button" id="lookupButton" type="button">Buscar info online</button>
+        </div>
+
+        <div class="lookup-results" id="lookupResults" hidden></div>
+
+        <div class="form-grid">
+          <label>
+            <span>Generos</span>
+            <input id="genresInput" type="text" placeholder="Accion, Drama, Ciencia ficcion" />
+          </label>
+
+          <label>
+            <span>Estado</span>
+            <select id="movieStatusInput">
+              <option value="watchlist">Por ver</option>
+              <option value="watched">Vista</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Valoracion personal</span>
+            <select id="movieCategoryInput">
+              <option value="standard">Sin categoria</option>
+              <option value="favorite">Favorita</option>
+              <option value="enjoyable">Disfrutable</option>
+              <option value="good">Buena</option>
+              <option value="passable">Pasable</option>
+              <option value="meh">Meh</option>
+              <option value="bad">Mala</option>
+              <option value="terrible">Terrible</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="cover-fields">
+          <div class="cover-inputs">
+            <label>
+              <span>Caratula por enlace</span>
+              <input id="coverInput" type="text" placeholder="https://... o deja este campo vacio si subes una imagen" />
+            </label>
+
+            <label>
+              <span>Caratula desde tu dispositivo</span>
+              <input id="coverFileInput" type="file" accept="image/*" />
+            </label>
+          </div>
+
+          <figure class="cover-preview">
+            <img id="coverPreviewImage" alt="Vista previa de la caratula" hidden />
+            <figcaption id="coverPreviewText">Sin caratula seleccionada</figcaption>
+          </figure>
+        </div>
+
+        <label>
+          <span>Sinopsis</span>
+          <textarea id="synopsisInput" rows="5" placeholder="La sinopsis aparecera aqui o puedes escribirla a mano."></textarea>
+        </label>
+
+        <fieldset class="rating-field">
+          <legend>Tu valoracion</legend>
+          <div class="star-rating" id="ratingOptions" role="slider" aria-label="Valoracion" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" tabindex="0">
+            <span class="star-track" aria-hidden="true">★★★★★</span>
+            <span class="star-fill" id="ratingFill" aria-hidden="true">★★★★★</span>
+          </div>
+          <p class="rating-readout" id="ratingReadout">Sin nota</p>
+        </fieldset>
+
+        <p class="form-note" id="lookupNote" role="status"></p>
+
+        <div class="modal-actions">
+          <button class="danger-button" id="deleteButton" type="button" hidden>Eliminar</button>
+          <button class="primary-button" type="submit">Guardar</button>
+        </div>
+      </form>
+    </dialog>
+
+    <aside class="side-panel" id="filtersPanel" aria-hidden="true" aria-label="Filtros y resumen">
+      <div class="side-panel-card">
+        <div class="modal-heading">
+          <div>
+            <p class="eyebrow">Control</p>
+            <h2>Menu</h2>
+          </div>
+          <button class="icon-button" id="closeFiltersButton" type="button" aria-label="Cerrar">x</button>
+        </div>
+
+        <section class="stats" aria-label="Resumen">
+          <article>
+            <span id="totalCount">0</span>
+            <p>Peliculas</p>
+          </article>
+          <article>
+            <span id="watchlistCount">0</span>
+            <p>Por ver</p>
+          </article>
+          <article>
+            <span id="watchedCount">0</span>
+            <p>Vistas</p>
+          </article>
+          <article>
+            <span id="favoriteCount">0</span>
+            <p>Favoritas</p>
+          </article>
+          <article>
+            <span id="terribleCount">0</span>
+            <p>Terribles</p>
+          </article>
+        </section>
+
+        <section class="quick-filters" aria-label="Categorias rapidas">
+          <button class="quick-filter active" type="button" data-category-filter="all">Todo</button>
+          <button class="quick-filter" type="button" data-category-filter="favorite">Favoritas</button>
+          <button class="quick-filter" type="button" data-category-filter="enjoyable">Disfrutables</button>
+          <button class="quick-filter" type="button" data-category-filter="good">Buenas</button>
+          <button class="quick-filter" type="button" data-category-filter="passable">Pasables</button>
+          <button class="quick-filter" type="button" data-category-filter="meh">Meh</button>
+          <button class="quick-filter" type="button" data-category-filter="bad">Malas</button>
+          <button class="quick-filter" type="button" data-category-filter="terrible">Terribles</button>
+        </section>
+
+        <div class="filter-stack">
+          <label>
+            <span>Estado</span>
+            <select id="statusFilter">
+              <option value="all">Todas</option>
+              <option value="watchlist">Por ver</option>
+              <option value="watched">Vistas</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Genero</span>
+            <select id="genreFilter">
+              <option value="all">Todos</option>
+            </select>
+          </label>
+
+          <label>
+            <span>Categoria</span>
+            <select id="categoryFilter">
+              <option value="all">Todas</option>
+              <option value="favorite">Favoritas</option>
+              <option value="enjoyable">Disfrutables</option>
+              <option value="good">Buenas</option>
+              <option value="passable">Pasables</option>
+              <option value="meh">Meh</option>
+              <option value="bad">Malas</option>
+              <option value="terrible">Terribles</option>
+              <option value="standard">Sin categoria</option>
+            </select>
+          </label>
+        </div>
+
+        <form class="settings-panel" id="settingsForm">
+          <div>
+            <p class="eyebrow">Ajustes</p>
+            <h3>Fuentes de datos</h3>
+          </div>
+          <p class="settings-copy sync-status" id="syncStatus">Catalogo guardado en este dispositivo.</p>
+          <p class="settings-copy">
+            Wikipedia funciona sin clave. TMDB suele tener mejores posters y sinopsis, pero necesitas una clave gratuita.
+          </p>
+          <label>
+            <span>Clave TMDB opcional</span>
+            <input id="tmdbKeyInput" type="password" placeholder="Pega aqui tu API key gratuita" autocomplete="off" />
+          </label>
+          <button class="primary-button" type="submit">Guardar ajustes</button>
+        </form>
+      </div>
+    </aside>
+
+    <div class="panel-backdrop" id="filtersBackdrop" hidden></div>
+
+    <dialog class="detail-modal" id="detailModal">
+      <article class="detail-body">
+        <button class="icon-button detail-close" id="closeDetailModal" type="button" aria-label="Cerrar">x</button>
+        <div class="detail-poster-wrap" id="detailPosterWrap"></div>
+        <div class="detail-copy">
+          <p class="eyebrow" id="detailCategory">Ficha</p>
+          <h2 id="detailTitle"></h2>
+          <div class="detail-meta" id="detailMeta"></div>
+          <div class="rating detail-rating" id="detailRating"></div>
+          <p id="detailSynopsis"></p>
+          <div class="badge-row" id="detailBadges"></div>
+          <div class="modal-actions detail-actions">
+            <button class="ghost-button" id="detailMarkWatchedButton" type="button"></button>
+            <button class="primary-button" id="editFromDetailButton" type="button">Editar ficha</button>
+          </div>
+        </div>
+      </article>
+    </dialog>
+
+    <script src="./config.js"></script>
+    <script src="./app.js" type="module"></script>
+  </body>
+</html>
